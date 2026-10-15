@@ -49,8 +49,11 @@ function mapQuestion(raw: TriviaResponse['results'][number]): QuizQuestion {
 }
 
 // Obtém as perguntas do quiz a partir da Open Trivia Database
-export async function fetchQuestions(config: QuizConfig): Promise<QuizQuestion[]> {
-  const response = await fetch(buildUrl(config))
+export async function fetchQuestions(
+  config: QuizConfig,
+  signal?: AbortSignal,
+): Promise<QuizQuestion[]> {
+  const response = await fetch(buildUrl(config), { signal })
 
   if (!response.ok) {
     throw new Error('Failed to reach the trivia API. Please try again.')
