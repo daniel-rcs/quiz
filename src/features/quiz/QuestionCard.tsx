@@ -6,10 +6,8 @@ interface QuestionCardProps {
   question: QuizQuestion
   selectedOption: string | null
   submitted: boolean
-  isLast: boolean
   onSelect: (option: string) => void
   onAnswer: () => void
-  onNext: () => void
 }
 
 // Determina o estado visual de uma opção consoante a fase de resposta
@@ -32,10 +30,8 @@ export function QuestionCard({
   question,
   selectedOption,
   submitted,
-  isLast,
   onSelect,
   onAnswer,
-  onNext,
 }: QuestionCardProps) {
   return (
     <div className="space-y-6">
@@ -59,17 +55,11 @@ export function QuestionCard({
         </p>
       )}
 
-      <div>
-        {submitted ? (
-          <Button onClick={onNext} className="w-full">
-            {isLast ? 'See Results' : 'Next Question'}
-          </Button>
-        ) : (
-          <Button onClick={onAnswer} disabled={!selectedOption} className="w-full">
-            Answer
-          </Button>
-        )}
-      </div>
+      {!submitted && (
+        <Button onClick={onAnswer} disabled={!selectedOption} className="w-full">
+          Answer
+        </Button>
+      )}
     </div>
   )
 }

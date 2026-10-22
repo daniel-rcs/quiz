@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '../../components/Button'
+import { FEEDBACK_DELAY_MS } from '../../constants/quiz'
 import type { QuizConfig, QuizQuestion } from '../../types'
 import { fetchQuestions } from '../trivia/triviaApi'
 import { ProgressHeader } from './ProgressHeader'
@@ -60,17 +61,21 @@ export function QuizScreen({ config, onFinish }: QuizScreenProps) {
     setSubmitted(true)
   }
 
-  // Avança para a próxima pergunta ou termina o quiz
-  const handleNext = () => {
-    const isLastQuestion = currentIndex === questions.length - 1
-    if (isLastQuestion) {
-      onFinish({ score, total: questions.length })
-      return
-    }
-    setCurrentIndex((current) => current + 1)
-    setSelectedOption(null)
-    setSubmitted(false)
-  }
+  // Após o feedback, passa automaticamente para a próxima pergunta ou termina o quiz
+  useEffect(() => {
+    if (!submitted) return
+    const timeoutId = setTimeout(() => {
+      const isLastQuestion = currentIndex === questions.length - 1
+      if (isLastQuestion) {
+        onFinish({ score, total: questions.length })
+        return
+      }
+      setCurrentIndex((current) => current + 1)
+      setSelectedOption(null)
+      setSubmitted(false)
+    }, FEEDBACK_DELAY_MS)
+    return () => clearTimeout(timeoutId)
+  }, [submitted, currentIndex, questions.length, score, onFinish])
 
   const handleRetry = () => {
     setRetryCount((current) => current + 1)
@@ -95,7 +100,6 @@ export function QuizScreen({ config, onFinish }: QuizScreenProps) {
   }
 
   const currentQuestion = questions[currentIndex]
-  const isLastQuestion = currentIndex === questions.length - 1
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
@@ -104,10 +108,8 @@ export function QuizScreen({ config, onFinish }: QuizScreenProps) {
         question={currentQuestion}
         selectedOption={selectedOption}
         submitted={submitted}
-        isLast={isLastQuestion}
         onSelect={setSelectedOption}
         onAnswer={handleAnswer}
-        onNext={handleNext}
       />
     </div>
   )
